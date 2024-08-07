@@ -1,6 +1,7 @@
 package kctest
 
 import (
+	"context"
 	"fmt"
 	"path/filepath"
 	"runtime"
@@ -9,16 +10,33 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
+	logf "sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/controller-runtime/pkg/log/zap"
+
+	ginkgo "github.com/onsi/ginkgo/v2"
 )
 
 type Cluster struct {
-	name      string
-	env       *envtest.Environment
-	client    client.Client
-	clientSet *kubernetes.Clientset
+	name        string
+	env         *envtest.Environment
+	client      client.Client
+	clientSet   *kubernetes.Clientset
+	kindCluster bool
 }
 
-func NewCluster(name string) (*Cluster, error) {
+type Config struct {
+	kindCluster bool
+}
+
+func NewCluster(ctx context.Context, name string, config Config) (*Cluster, error) {
+	logf.SetLogger(zap.New(zap.WriteTo(ginkgo.GinkgoWriter), zap.UseDevMode(true)))
+	if name == "" {
+		return nil, fmt.Errorf("a cluster name must be provided")
+	}
+	if err := kindClusterCreate(ctx, name, config.kindCluster); err != nil {
+		return nil, err
+	}
+
 	testEnv := &envtest.Environment{
 		ErrorIfCRDPathMissing: true,
 
@@ -57,7 +75,13 @@ func NewCluster(name string) (*Cluster, error) {
 }
 
 func (c *Cluster) Stop() error {
-	return c.env.Stop()
+	if err := c.env.Stop(); err != nil {
+		return err
+	}
+	if c.kindCluster {
+		return kindClusterDelete(c.name)
+	}
+	return nil
 }
 
 func (c *Cluster) Client() client.Client {
