@@ -75,6 +75,7 @@ func TestNewKindCluster(t *testing.T) {
 
 	for _, tc := range scenarios {
 		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
 			result, err := NewCluster(context.Background(), tc.clusterName, tc.config)
 			if !tc.clusterCreated {
 				if err == nil {

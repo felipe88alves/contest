@@ -53,15 +53,62 @@ func TestCreate(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to setup kind cluster: %s", err.Error())
 	}
-	defer func() { _ = c.Stop() }()
+	defer t.Cleanup(func() { _ = c.Stop() })
+
 	for _, tc := range scenarios {
 		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
 			cm := new(corev1.ConfigMap)
 			if tc.setupResource {
 				cm = setupConfigMap(tc.resourceName)
 			}
 
 			err = c.Create(cm)
+			errResult := (err != nil)
+			if errResult != tc.expectedFail {
+				t.Fatalf("Expected to fail: %t, Result: %t, Error: %s", tc.expectedFail, errResult, err.Error())
+			}
+		})
+	}
+}
+
+func TestGet(t *testing.T) {
+	scenarios := []struct {
+		name          string
+		resourceName  string
+		setupResource bool
+		expectedFail  bool
+	}{
+		{
+			name:          "Resource is created. Get succeeds.",
+			resourceName:  "1",
+			setupResource: true,
+			expectedFail:  false,
+		},
+		{
+			name:          "Resource is not created. Get fails.",
+			resourceName:  "2",
+			setupResource: false,
+			expectedFail:  true,
+		},
+	}
+	c, err := setupK8sClient()
+	if err != nil {
+		t.Fatalf("failed to setup kind cluster: %s", err.Error())
+	}
+	defer t.Cleanup(func() { _ = c.Stop() })
+	for _, tc := range scenarios {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			cm := new(corev1.ConfigMap)
+			if tc.setupResource {
+				cm = setupConfigMap(tc.resourceName)
+				if err = c.Create(cm); err != nil {
+					t.Fatalf("setup failed. Failed to create resource: %s", err.Error())
+				}
+			}
+
+			err := c.Get(cm)()
 			errResult := (err != nil)
 			if errResult != tc.expectedFail {
 				t.Fatalf("Expected to fail: %t, Result: %t, Error: %s", tc.expectedFail, errResult, err.Error())
