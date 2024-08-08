@@ -1,5 +1,3 @@
-OS ?= "$(uname -s | tr '[:upper:]' '[:lower:]')"
-ARCH ?= "$(uname -m | sed -e 's\aarch64$\arm64\' -e 's\x86_64/amd64' )"
 
 ##@ General
 
@@ -26,6 +24,17 @@ lint: golangci-lint ## Run golangci-lint linter
 .PHONY: lint-fix
 lint-fix: golangci-lint ## Run golangci-lint linter and perform fixes
 	$(GOLANGCI_LINT) run --fix
+
+.PHONY: clean
+clean: clean-envtest clean-kind
+
+.PHONY: clean-kind
+clean-kind: kind
+	$(shell ./hack/clean-kind.sh)
+
+.PHONY: clean-envtest
+clean-envtest:
+	$(shell ./hack/clean-envtest.sh $(ENVTEST_K8S_VERSION))
 
 ##@ Dependencies
 
