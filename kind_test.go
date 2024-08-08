@@ -15,19 +15,19 @@ func TestKindClusterCreate(t *testing.T) {
 		{
 			name:        "Cluster name is valid. Result: Kind cluster is created.",
 			clusterName: "test-cluster1",
-			config:      Config{kindCluster: true},
+			config:      Config{KindCluster: true},
 			shouldFail:  false,
 		},
 		{
 			name:        "Cluster name is invalid. Result: Kind cluster is not created.",
 			clusterName: "test_cluster",
-			config:      Config{kindCluster: true},
+			config:      Config{KindCluster: true},
 			shouldFail:  true,
 		},
 		{
 			name:        "Cluster config set kind to false. Result: Kind cluster is not created.",
 			clusterName: "test-cluster2",
-			config:      Config{kindCluster: false},
+			config:      Config{KindCluster: false},
 			shouldFail:  false,
 		},
 	}
@@ -35,12 +35,12 @@ func TestKindClusterCreate(t *testing.T) {
 	for _, tc := range scenarios {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
-			err := kindClusterCreate(context.Background(), tc.clusterName, tc.config.kindCluster)
+			err := kindClusterCreate(context.Background(), tc.clusterName, tc.config.KindCluster)
 			defer func() { _ = kindClusterDelete(tc.clusterName) }()
 
 			errResult := (err != nil)
 			if errResult != tc.shouldFail {
-				t.Fatalf("Test Failed: %s\nExpected to fail: %t, Result: %t, Error: %s", tc.name, tc.shouldFail, errResult, err)
+				t.Fatalf("Test Failed: %s\nExpected to fail: %t, Result: %t, Error: %s", tc.name, tc.shouldFail, errResult, err.Error())
 			}
 		})
 	}
@@ -71,14 +71,14 @@ func TestKindClusterDelete(t *testing.T) {
 			t.Parallel()
 			if tc.setupCluster {
 				if err := kindClusterCreate(context.Background(), tc.clusterName, true); err != nil {
-					t.Fatal("failed to setup Kind Cluster")
+					t.Fatal("failed to setup Kind Cluster: %w", err)
 				}
 			}
 
 			err := kindClusterDelete(tc.clusterName)
 			errResult := (err != nil)
 			if errResult != tc.expectedFail {
-				t.Fatalf("Test Failed: %s\nExpected to fail: %t, Result: %t, Error: %s", tc.name, tc.expectedFail, errResult, err)
+				t.Fatalf("Expected to fail: %t, Result: %t, Error: %s", tc.expectedFail, errResult, err.Error())
 			}
 
 		})

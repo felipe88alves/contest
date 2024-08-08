@@ -10,12 +10,12 @@ func TestNewEnvTestCluster(t *testing.T) {
 		name           string
 		clusterName    string
 		config         Config
-		cleanupCluster bool
+		clusterCreated bool
 	}{
 		{
 			name:           "Function is called. Result: testEnv Cluster is created",
 			clusterName:    "test-cluster",
-			cleanupCluster: true,
+			clusterCreated: true,
 		},
 	}
 
@@ -28,7 +28,7 @@ func TestNewEnvTestCluster(t *testing.T) {
 					t.Fatalf("Test failed: %s\nFailed to Cleanup Cluster.", tc.name)
 				}
 			}() // fail safe
-			if !tc.cleanupCluster {
+			if !tc.clusterCreated {
 				if err == nil {
 					t.Fatalf("Test Failed: %s", tc.name)
 				}
@@ -56,26 +56,25 @@ func TestNewKindCluster(t *testing.T) {
 		{
 			name:           "An invalid clusterName is provided. Result: Kind Cluster is not created",
 			clusterName:    "new_kind_cluster1",
-			config:         Config{kindCluster: true},
+			config:         Config{KindCluster: true},
 			clusterCreated: false,
 		},
 		{
 			name:           "A valid clusterName is provided. Result: Kind Cluster is created",
 			clusterName:    "new-kind-cluster2",
-			config:         Config{kindCluster: true},
+			config:         Config{KindCluster: true},
 			clusterCreated: true,
 		},
 		{
 			name:           "An empty clusterName is provided. Result: Kind Cluster is not created",
 			clusterName:    "",
-			config:         Config{kindCluster: true},
+			config:         Config{KindCluster: true},
 			clusterCreated: false,
 		},
 	}
 
 	for _, tc := range scenarios {
 		t.Run(tc.name, func(t *testing.T) {
-			t.Parallel()
 			result, err := NewCluster(context.Background(), tc.clusterName, tc.config)
 			if !tc.clusterCreated {
 				if err == nil {

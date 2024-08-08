@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset/scheme"
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/kubernetes/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
@@ -22,10 +22,11 @@ type Cluster struct {
 	client      client.Client
 	clientSet   *kubernetes.Clientset
 	kindCluster bool
+	ctx         context.Context
 }
 
 type Config struct {
-	kindCluster bool
+	KindCluster bool
 }
 
 func NewCluster(ctx context.Context, name string, config Config) (*Cluster, error) {
@@ -33,7 +34,7 @@ func NewCluster(ctx context.Context, name string, config Config) (*Cluster, erro
 	if name == "" {
 		return nil, fmt.Errorf("a cluster name must be provided")
 	}
-	if err := kindClusterCreate(ctx, name, config.kindCluster); err != nil {
+	if err := kindClusterCreate(ctx, name, config.KindCluster); err != nil {
 		return nil, err
 	}
 
@@ -65,10 +66,12 @@ func NewCluster(ctx context.Context, name string, config Config) (*Cluster, erro
 	}
 
 	cluster := &Cluster{
-		name:      name,
-		env:       testEnv,
-		client:    cli,
-		clientSet: clientSet,
+		name:        name,
+		env:         testEnv,
+		client:      cli,
+		clientSet:   clientSet,
+		ctx:         ctx,
+		kindCluster: config.KindCluster,
 	}
 	return cluster, nil
 

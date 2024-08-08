@@ -2,7 +2,6 @@ repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
   rev: v4.6.0
   hooks:
-    - id: check-merge-conflict
     - id: check-yaml
     - id: end-of-file-fixer
     - id: trailing-whitespace
@@ -11,22 +10,24 @@ repos:
   hooks:
     - id: forbid-crlf
     - id: remove-crlf
-    - id: forbid-tabs
-    - id: remove-tabs
-      args: [--whitespaces-count, '2']  # defaults to: 4
 - repo: https://github.com/dnephin/pre-commit-golang
   rev: v0.5.1
   hooks:
     - id: go-fmt
     - id: go-vet
-    - id: go-lint
     - id: go-imports
     - id: go-cyclo
       args: [-over=15]
     - id: validate-toml
-    - id: no-go-testing
     - id: golangci-lint
     - id: go-critic
-    - id: go-unit-tests
     - id: go-build
     - id: go-mod-tidy
+-   repo: local
+    hooks:
+    -   id: go-unit-tests
+        name: go unit tests
+        entry: make test
+        pass_filenames: false
+        types: [go]
+        language: system
