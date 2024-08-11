@@ -42,6 +42,8 @@ linters:
     - unused
 
 linters-settings:
+  dupl:
+    threshold: 200
   revive:
     rules:
       - name: comment-spacings
