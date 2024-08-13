@@ -19,7 +19,7 @@ func kindClusterCreate(ctx context.Context, name string, isKindCluster bool) err
 	if err := dockerCheck(ctx); err != nil {
 		return fmt.Errorf("verify if docker is installed. Error: %w", err)
 	}
-	cmd := exec.Command("kind", "create", "cluster", "--name", name)
+	cmd := exec.CommandContext(ctx, "kind", "create", "cluster", "--name", name)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		return fmt.Errorf("failed to create Kind cluster: %s. Verify if kind is installed", output)
@@ -27,15 +27,15 @@ func kindClusterCreate(ctx context.Context, name string, isKindCluster bool) err
 	return nil
 }
 
-func kindClusterDelete(name string) error {
-	cmd := exec.Command("kind", "get", "clusters")
+func kindClusterDelete(ctx context.Context, name string) error {
+	cmd := exec.CommandContext(ctx, "kind", "get", "clusters")
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		return fmt.Errorf("failed to get Kind clusters: %s. Verify if kind is installed", output)
 	}
 	clusterSlice := strings.Split(string(output), "\n")
 	if slices.Contains(clusterSlice[:len(clusterSlice)-1], name) {
-		cmd := exec.Command("kind", "delete", "cluster", "--name", name)
+		cmd := exec.CommandContext(ctx, "kind", "delete", "cluster", "--name", name)
 		output, err := cmd.CombinedOutput()
 		if err != nil {
 			return fmt.Errorf("failed to delete Kind cluster: %s", output)

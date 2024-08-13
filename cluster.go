@@ -82,7 +82,7 @@ func (c *Cluster) Stop() error {
 		return err
 	}
 	if c.kindCluster {
-		return kindClusterDelete(c.name)
+		return kindClusterDelete(c.ctx, c.name)
 	}
 	return nil
 }

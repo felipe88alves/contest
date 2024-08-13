@@ -36,7 +36,7 @@ func TestKindClusterCreate(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 			err := kindClusterCreate(context.Background(), tc.clusterName, tc.config.KindCluster)
-			defer func() { _ = kindClusterDelete(tc.clusterName) }()
+			defer func() { _ = kindClusterDelete(context.Background(), tc.clusterName) }()
 
 			errResult := (err != nil)
 			if errResult != tc.shouldFail {
@@ -75,7 +75,7 @@ func TestKindClusterDelete(t *testing.T) {
 				}
 			}
 
-			err := kindClusterDelete(tc.clusterName)
+			err := kindClusterDelete(context.Background(), tc.clusterName)
 			errResult := (err != nil)
 			if errResult != tc.expectedFail {
 				t.Fatalf("Expected to fail: %t, Result: %t, Error: %s", tc.expectedFail, errResult, err.Error())
