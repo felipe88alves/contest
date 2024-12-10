@@ -83,6 +83,9 @@ func TestNewKindCluster(t *testing.T) {
 				}
 				return
 			}
+			if err != nil {
+				t.Fatalf("Test Failed: %s. Error: %s", tc.name, err)
+			}
 			defer func() { _ = result.Stop() }()
 			res := result.ClientSet().RESTClient().Get().AbsPath("/healthz").Do(context.Background())
 			if res.Error() != nil {
